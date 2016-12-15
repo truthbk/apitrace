@@ -14,6 +14,11 @@ if (POLICY CMP0042)
     cmake_policy (SET CMP0042 NEW)
 endif()
 
+if (APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
+    set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk")
+endif()
+
 
 project (apitrace)
 
