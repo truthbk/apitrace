@@ -602,7 +602,7 @@ class Tracer:
         print '    auto _dd_end = std::chrono::steady_clock::now();'
         print '    auto _dd_diff = _dd_end - _dd_start;'
         print '    std::vector<std::string> tags = {{std::string("function:{}")}};'.format(function.name)
-        trace = 'trace::dogstatsd.gauge( "{}", std::chrono::duration_cast<std::chrono::nanoseconds>(_dd_diff).count(), tags, 1 );'
+        trace = 'trace::dogstatsd.gauge( "{}", std::chrono::duration_cast<std::chrono::nanoseconds>(_dd_diff).count(), tags, 0.1 );'
         print '    '+trace.format(DD_PROFILE_METRIC)
 
     def doInvokeFunction(self, function, prefix='_', suffix=''):
