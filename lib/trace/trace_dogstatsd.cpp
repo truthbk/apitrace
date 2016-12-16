@@ -19,48 +19,50 @@ namespace trace {
 Dogstatsd::Dogstatsd() : Dogstatsd(false) { }
 Dogstatsd::Dogstatsd(bool buffered) :
     Dogstatsd(default_dog_host, default_dog_port, buffered) { }
-Dogstatsd::Dogstatsd(std::string host, uint32_t port, bool buffered){
-    this->buffered = buffered;
+Dogstatsd::Dogstatsd(std::string host, uint32_t port, bool buffered):
+    buffered(buffered) {
     this->_sockfd = socket(AF_INET,SOCK_DGRAM,0); //IPv4(only)/UDP
-    this->server.sin_family = AF_INET;
-    this->server.sin_port = htons(port);
-    this->server.sin_addr.s_addr = inet_addr(host);
+    this->_server.sin_family = AF_INET;
+    this->_server.sin_port = htons(port);
+    this->_server.sin_addr.s_addr = inet_addr(host.c_str());
 
     //plant a random seed
     srand(time(NULL));
 
+	//add a timer to periodically flush the cmd buffer.
+
 }
 Dogstatsd::~Dogstatsd(){
-    if (this->buffered()) {
+    if (buffered) {
         flush();
     }
 }
 
-int Dogstatsd::gauge( std::string, double value, std::vector<std::string> tags, double rate){
+int Dogstatsd::gauge( std::string name, double value, std::vector<std::string> tags, double rate){
     std::ostringstream statd;
     statd << std::setprecision(6) << value << "|g";
-    send(name, statd.str(), tags, rate);
+    return send(name, statd.str(), tags, rate);
 }
-int Dogstatsd::count( std::string, int64_t value, std::vector<std::string> tags, double rate){
+int Dogstatsd::count( std::string name, int64_t value, std::vector<std::string> tags, double rate){
     std::ostringstream statd;
     statd << value << "|c";
-    send(name, statd.str(), tags, rate);
+    return send(name, statd.str(), tags, rate);
 }
-int Dogstatsd::histogram( std::string, double value, std::vector<std::string> tags, double rate){
+int Dogstatsd::histogram( std::string name, double value, std::vector<std::string> tags, double rate){
     std::ostringstream statd;
     statd << std::setprecision(6) << value << "|h";
-    send(name, statd.str(), tags, rate);
+    return send(name, statd.str(), tags, rate);
 }
 int Dogstatsd::incr( std::string name, std::vector<std::string> tags, double rate){
-    send(name, "1|c", tags, rate);
+    return send(name, "1|c", tags, rate);
 }
 int Dogstatsd::decr( std::string name, std::vector<std::string> tags, double rate){
-    send(name, "-1|c", tags, rate);
+    return send(name, "-1|c", tags, rate);
 }
 int Dogstatsd::set( std::string name, std::string value, std::vector<std::string> tags, double rate){
     std::ostringstream statd;
     statd << value << "|s";
-    send(name, statd.str(), tags, rate);
+    return send(name, statd.str(), tags, rate);
 }
 int Dogstatsd::send( std::string name, std::string statd, std::vector<std::string> tags, double rate){
     int ret = 0;
@@ -69,9 +71,9 @@ int Dogstatsd::send( std::string name, std::string statd, std::vector<std::strin
         return ret;
     }
 
-    std::string cmd = std::string(format(name, statd, tags, rate));
+    std::string cmd(format(name, statd, tags, rate));
     if (!buffered) {
-        return sendto(_sockfd, cmd.c_str(), cmd.length(), 0, (struct sockaddr *)&_server, sizeof(m));
+        return sendto(_sockfd, cmd.c_str(), cmd.length(), 0, (struct sockaddr *)&_server, sizeof(_server));
     }
 
     std::lock_guard<std::mutex> lock(_buff_mutex);
@@ -92,13 +94,14 @@ int Dogstatsd::flush(){
         return 0;
     }
     while (cmd_buffer.empty()) {
-        statd << cmd_buffer.pop_back() << std::endl;
+        statd << cmd_buffer.back() << std::endl;
+		cmd_buffer.pop_back();
     }
-    std::string buffer = std::string(statd.str());
+    std::string buffer(statd.str());
 
-    return sendto(_sockfd, buffer.c_str(), buffer.length(), 0, (struct sockaddr *)&_server, sizeof(m));
+    return sendto(_sockfd, buffer.c_str(), buffer.length(), 0, (struct sockaddr *)&_server, sizeof(_server));
 }
-std::string Dogstatsd::format( std::string, std::string, std::vector<std::string> tags, double rate){
+std::string Dogstatsd::format( std::string name, std::string value, std::vector<std::string> tags, double rate){
     std::ostringstream statd;
 
     statd << name << ":" << value;
@@ -107,19 +110,17 @@ std::string Dogstatsd::format( std::string, std::string, std::vector<std::string
     }
 
     if (tags.size()) {
-        std::vector<string>::iterator it = tags.begin();
+		// TODO: remove newlines from the tags.
+        std::vector<std::string>::iterator it = tags.begin();
 
         statd << "|#" << *it;
         for( ; it != tags.end() ; ++it) {
-            statd << "," << *it
+            statd << "," << *it;
         }
     }
-	if rate < 1 {
-		buf.WriteString(`|@`)
-		buf.WriteString(strconv.FormatFloat(rate, 'f', -1, 64))
-	}
-
-	writeTagString(&buf, c.Tags, tags)
+	return statd.str();
 }
+
+Dogstatsd dogstatsd(true);
 
 }

@@ -6,6 +6,7 @@ include_directories (
 
 add_convenience_library (common
     trace_callset.cpp
+    trace_dogstatsd.cpp
     trace_dump.cpp
     trace_fast_callset.cpp
     trace_file.cpp
