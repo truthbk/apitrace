@@ -111,7 +111,9 @@ namespace trace {
     } else {
       cmd_buffer.push_back(cmd);
       ret = flush();
-      std::cout << "FLUSH(" << _sockfd << ") result: " << ret << " errno: " << strerror(errno) << std::endl;
+      if (ret < 0 ) {
+        std::cout << "FLUSH(" << _sockfd << ") result: " << ret << " errno: " << strerror(errno) << std::endl;
+      }
     }
     return ret;
   }
@@ -189,7 +191,7 @@ namespace trace {
     }
 #endif
     if (!fullpath.empty()) {
-      std::string binary(fullpath.substr(fullpath.find_last_of('/')));
+      std::string binary(fullpath.substr(fullpath.find_last_of('/')+1));
       std::replace(binary.begin(), binary.end(), ' ', '_');
       tags.push_back("binary:"+binary);
     }
