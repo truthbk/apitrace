@@ -43,6 +43,7 @@ def getWrapperInterfaceName(interface):
 debug = False
 
 DD_PROFILE_METRIC = 'capi.hackathon.gpu.exec_time'
+DD_FREQ_METRIC = 'capi.hackathon.gpu.freq'
 
 class ComplexValueSerializer(stdapi.OnceVisitor):
     '''Type visitors which generates serialization functions for
@@ -604,6 +605,7 @@ class Tracer:
         print '    std::vector<std::string> tags = {{std::string("function:{}")}};'.format(function.name)
         trace = 'trace::dogstatsd.gauge( "{}", std::chrono::duration_cast<std::chrono::nanoseconds>(_dd_diff).count(), tags, 0.1 );'
         print '    '+trace.format(DD_PROFILE_METRIC)
+        print '    trace::dogstatsd.incr( "{}", tags, 0.01 );'.format(DD_FREQ_METRIC)
 
     def doInvokeFunction(self, function, prefix='_', suffix=''):
         # Same as invokeFunction() but called both when trace is enabled or disabled.
