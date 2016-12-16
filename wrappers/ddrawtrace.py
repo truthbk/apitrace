@@ -44,6 +44,7 @@ if __name__ == '__main__':
     print '#define INITGUID'
     print '#include "d3dimports.hpp"'
     print '#include "trace_writer_local.hpp"'
+    print '#include "trace_dogstatsd.hpp"'
     print '#include "d3d7size.hpp"'
     print '#include "os.hpp"'
     print

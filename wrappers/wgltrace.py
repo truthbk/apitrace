@@ -257,6 +257,7 @@ if __name__ == '__main__':
     print '#include <sstream>'
     print
     print '#include "trace_writer_local.hpp"'
+    print '#include "trace_dogstatsd.hpp"'
     print '#include "os.hpp"'
     print
     print '// To validate our prototypes'

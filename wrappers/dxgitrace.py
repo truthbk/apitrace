@@ -91,10 +91,10 @@ class D3DCommonTracer(DllTracer):
         dxgi.IDXGISurface,
         d3d10.ID3D10Resource,
     )
-    
+
     def enumWrapperInterfaceVariables(self, interface):
         variables = DllTracer.enumWrapperInterfaceVariables(self, interface)
-        
+
         # Add additional members to track maps
         if interface.hasBase(*self.mapInterfaces):
             variables += [
@@ -205,6 +205,7 @@ if __name__ == '__main__':
     print r'#include "guids_defs.hpp"'
     print
     print r'#include "trace_writer_local.hpp"'
+    print r'#include "trace_dogstatsd.hpp"'
     print r'#include "os.hpp"'
     print
     print r'#include "dxgitrace.hpp"'

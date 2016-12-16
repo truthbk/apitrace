@@ -34,6 +34,7 @@ if __name__ == '__main__':
     print '#include "guids_defs.hpp"'
     print
     print '#include "trace_writer_local.hpp"'
+    print '#include "trace_dogstatsd.hpp"'
     print '#include "os.hpp"'
     print
     print '#define DWRITE_EXPORT WINAPI'

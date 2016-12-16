@@ -108,6 +108,7 @@ if __name__ == '__main__':
     print '#include <string.h>'
     print
     print '#include "trace_writer_local.hpp"'
+    print '#include "trace_dogstatsd.hpp"'
     print
     print '// To validate our prototypes'
     print '#define GL_GLEXT_PROTOTYPES'
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     print '#include "glsize.hpp"'
     print '#include "eglsize.hpp"'
     print
-    
+
     module = Module()
     module.mergeModule(eglapi)
     module.mergeModule(glapi)
