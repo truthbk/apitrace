@@ -1,12 +1,15 @@
 #pragma once
 
+#include <netinet/in.h>
+#include <sys/types.h>
+
 #include <string>
 #include <vector>
 #include <mutex>
 
 namespace trace {
 
-const std::string default_dog_host = "localhost";
+const std::string default_dog_host = "127.0.0.1";
 const uint32_t default_dog_port = 8125;
 const uint32_t max_udp_payload = 65467;
 const uint32_t max_buff_cmds = 100;

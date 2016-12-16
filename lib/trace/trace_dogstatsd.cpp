@@ -1,16 +1,17 @@
 #include<arpa/inet.h>
-#include<unistd.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <string.h>
 #include <time.h>       /* time */
 
 #include <iostream>
 #include <sstream> // for ostringstream
 #include <iomanip>
 
-#include<cstdio>
-#include<cstdlib>
+#include <cstdio>
+#include <cstdlib>
 
 #include "trace_dogstatsd.hpp"
 
@@ -72,6 +73,7 @@ int Dogstatsd::send( std::string name, std::string statd, std::vector<std::strin
     }
 
     std::string cmd(format(name, statd, tags, rate));
+
     if (!buffered) {
         return sendto(_sockfd, cmd.c_str(), cmd.length(), 0, (struct sockaddr *)&_server, sizeof(_server));
     }
@@ -93,7 +95,7 @@ int Dogstatsd::flush(){
     if(!buffered) {
         return 0;
     }
-    while (cmd_buffer.empty()) {
+    while (!cmd_buffer.empty()) {
         statd << cmd_buffer.back() << std::endl;
 		cmd_buffer.pop_back();
     }
@@ -113,7 +115,7 @@ std::string Dogstatsd::format( std::string name, std::string value, std::vector<
 		// TODO: remove newlines from the tags.
         std::vector<std::string>::iterator it = tags.begin();
 
-        statd << "|#" << *it;
+        statd << "|#" << *it++;
         for( ; it != tags.end() ; ++it) {
             statd << "," << *it;
         }
